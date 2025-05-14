@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Lugares - Matemática</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <h1><i class="fas fa-chair"></i> Sistema de Seleção de Lugares</h1>
+        <p class="subtitle">Matemática - Professor(a) [Seu Nome]</p>
+    </header>
+
+    <div id="successMessage" class="success-message"></div>
+    
+    <main class="main-content">
+        <section class="classroom-container">
+            <h2><i class="fas fa-map-marked-alt"></i> Mapa da Sala</h2>
+            
+            <div class="teacher-area">
+                <i class="fas fa-chalkboard-teacher"></i> Área do Professor
+            </div>
+            
+            <div class="classroom" id="classroom">
+                <!-- Porta (A1-A2) -->
+                <div class="seat door">
+                    <span class="seat-label">A1-A2</span>
+                    <i class="fas fa-door-open"></i> Porta
+                </div>
+                
+                <!-- Assentos A3-A6 -->
+                <div class="seat" data-seat="A3">
+                    <span class="seat-label">A3</span>
+                </div>
+                <!-- [...] A4-A6 similares -->
+            </div>
+        </section>
+
+        <section class="form-container">
+            <h2><i class="fas fa-edit"></i> Formulário de Reserva</h2>
+            <form id="seatForm">
+                <!-- [Todos os campos do formulário mantidos] -->
+            </form>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>Sistema desenvolvido por [Seu Nome] - © <span id="current-year"></span></p>
+    </footer>
+
+    <!-- ====================== -->
+    <!-- SCRIPT PRINCIPAL -->
+    <!-- ====================== -->
+    <script>
+        // Configuração para GitHub Pages
+        const CONFIG = {
+            GOOGLE_SCRIPT_URL: "https://script.google.com/macros/s/SEU_SCRIPT_ID/exec",
+            PASSWORD: "prof123", // Senha para reset
+            MAX_NAME_DISPLAY: 10 // Caracteres no assento
+        };
+
+        // [Todo o código JavaScript anterior mantido]
+        // Com estas adaptações:
+
+        // Função para enviar dados ao Google Sheets
+        async function saveToGoogleSheet(data) {
+            try {
+                const response = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        action: "submitSeat", 
+                        data: data,
+                        key: "SUA_CHAVE_SECRETA" // Para autenticação
+                    })
+                });
+                
+                if (!response.ok) throw new Error("Erro na rede");
+                return await response.json();
+                
+            } catch (error) {
+                console.error("Erro ao enviar:", error);
+                return { status: "error", message: error.message };
+            }
+        }
+
+        // Atualiza o ano no footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>
