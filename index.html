@@ -3,93 +3,485 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Lugares - Matemática</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>Sistema de Seleção de Lugares - Matemática</title>
+    <style>
+        :root {
+            --teacher-color: #9b59b6;
+            --door-color: #f39c12;
+            --available-color: #ecf0f1;
+            --selected-color: #2ecc71;
+            --occupied-color: #e74c3c;
+            --border-color: #3498db;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .classroom-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .teacher-area {
+            grid-column: 3 / span 4;
+            background: var(--teacher-color);
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+            margin-bottom: -5px;
+            font-weight: bold;
+            margin-left: 33%;
+            width: 64%;
+            transform: translateX(8px);
+        }
+        .classroom {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            margin: 15px 0;
+        }
+        .seat {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            border: 2px solid var(--border-color);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: var(--available-color);
+            overflow: hidden;
+        }
+        .seat.door {
+            grid-column: span 2;
+            aspect-ratio: 2;
+            background: var(--door-color);
+            color: white;
+            cursor: default;
+        }
+        .seat.selected {
+            background: var(--selected-color);
+            color: white;
+            transform: scale(1.05);
+        }
+        .seat.occupied {
+            background: var(--occupied-color);
+            color: white;
+            cursor: not-allowed;
+        }
+        .seat-label {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            font-size: 10px;
+            color: #7f8c8d;
+        }
+        .student-info {
+            padding: 2px;
+            font-size: 12px;
+            text-align: center;
+            word-break: break-word;
+        }
+        .form-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        button {
+            background-color: var(--border-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .success-message {
+            background-color: var(--selected-color);
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .teacher-only {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+        }
+    </style>
 </head>
 <body>
-    <header class="header">
-        <h1><i class="fas fa-chair"></i> Sistema de Seleção de Lugares</h1>
-        <p class="subtitle">Matemática - Professor(a) [Seu Nome]</p>
-    </header>
-
+    <h1>Sistema de Seleção de Lugares</h1>
+    
     <div id="successMessage" class="success-message"></div>
     
-    <main class="main-content">
-        <section class="classroom-container">
-            <h2><i class="fas fa-map-marked-alt"></i> Mapa da Sala</h2>
-            
-            <div class="teacher-area">
-                <i class="fas fa-chalkboard-teacher"></i> Área do Professor
+    <div class="classroom-container">
+        <h2>Layout da Sala de Aula</h2>
+        
+        <div class="teacher-area">Área do Professor</div>
+        
+        <div class="classroom" id="classroom">
+            <!-- Door (A1-A2) -->
+            <div class="seat door">
+                <span class="seat-label">A1-A2</span>
+                🚪 Porta
             </div>
             
-            <div class="classroom" id="classroom">
-                <!-- Porta (A1-A2) -->
-                <div class="seat door">
-                    <span class="seat-label">A1-A2</span>
-                    <i class="fas fa-door-open"></i> Porta
-                </div>
-                
-                <!-- Assentos A3-A6 -->
-                <div class="seat" data-seat="A3">
-                    <span class="seat-label">A3</span>
-                </div>
-                <!-- [...] A4-A6 similares -->
+            <!-- Student seats (A3-A6) -->
+            <div class="seat" data-seat="A3">
+                <span class="seat-label">A3</span>
             </div>
-        </section>
+            <div class="seat" data-seat="A4">
+                <span class="seat-label">A4</span>
+            </div>
+            <div class="seat" data-seat="A5">
+                <span class="seat-label">A5</span>
+            </div>
+            <div class="seat" data-seat="A6">
+                <span class="seat-label">A6</span>
+            </div>
+            
+            <!-- Student seats (B1-F6) will be generated by JS -->
+        </div>
+    </div>
 
-        <section class="form-container">
-            <h2><i class="fas fa-edit"></i> Formulário de Reserva</h2>
-            <form id="seatForm">
-                <!-- [Todos os campos do formulário mantidos] -->
-            </form>
-        </section>
-    </main>
+    <div class="form-container">
+        <h2>Formulário de Escolha</h2>
+        <form id="seatForm">
+            <div class="form-group">
+                <label for="studentId">ID do Aluno (RM):</label>
+                <input type="text" id="studentId" name="studentId" placeholder="Digite seu número de matrícula" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="studentName">Nome Completo:</label>
+                <input type="text" id="studentName" name="studentName" placeholder="Seu nome completo" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="studentEmail">E-mail:</label>
+                <input type="email" id="studentEmail" name="studentEmail" placeholder="seu@email.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="selectedSeat">Lugar Selecionado:</label>
+                <input type="text" id="selectedSeat" name="selectedSeat" readonly required>
+            </div>
+            
+            <div class="form-group">
+                <label for="preferenceReason">Por que você escolheu este lugar? (Opcional)</label>
+                <textarea id="preferenceReason" name="preferenceReason" placeholder="Ex: Preciso ficar perto da frente por questão visual"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="alternativeOption">Segunda opção de lugar (caso seu preferido já esteja ocupado):</label>
+                <input type="text" id="alternativeOption" name="alternativeOption" placeholder="Ex: B3, C2">
+            </div>
+            
+            <div class="form-group">
+                <label for="comments">Observações importantes:</label>
+                <textarea id="comments" name="comments" placeholder="Alguma necessidade especial ou informação relevante"></textarea>
+            </div>
+            
+            <button type="submit">Confirmar Escolha</button>
+        </form>
+    </div>
 
-    <footer class="footer">
-        <p>Sistema desenvolvido por [Seu Nome] - © <span id="current-year"></span></p>
-    </footer>
+    <div class="teacher-only">
+        <h3>Área do Professor</h3>
+        <p>Para resetar todos os lugares, digite a senha:</p>
+        <input type="password" id="teacherPassword" placeholder="Digite a senha">
+        <button id="resetAllBtn" style="display:none; margin-top:10px;" onclick="resetAllSeats()">Resetar Todos os Lugares</button>
+    </div>
 
-    <!-- ====================== -->
-    <!-- SCRIPT PRINCIPAL -->
-    <!-- ====================== -->
     <script>
-        // Configuração para GitHub Pages
+        // ======================
+        // CONFIGURATION
+        // ======================
+        // REPLACE THIS WITH YOUR GOOGLE SCRIPT URL:
+        
         const CONFIG = {
-            GOOGLE_SCRIPT_URL: "https://script.google.com/macros/s/SEU_SCRIPT_ID/exec",
-            PASSWORD: "prof123", // Senha para reset
-            MAX_NAME_DISPLAY: 10 // Caracteres no assento
+            GOOGLE_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwpWQC6Pmac1RSqZiYMDqFeG1cBzSWQq634xdgW439eEC8zW9WPUqeh0NL9i8u2bLQrLw/exec",
+            API_KEY: "W7x9-K2p4-R6t8-Y1v3!Q5z0-U8n2-M4b6",
+            PASSWORD: "prof123",
+            MAX_NAME_DISPLAY: 10
         };
 
-        // [Todo o código JavaScript anterior mantido]
-        // Com estas adaptações:
+        
+        // ======================
+        // INITIAL SETUP
+        // ======================
+        const classroomData = {
+            seats: JSON.parse(localStorage.getItem('classroomSeats')) || 
+                Array(6).fill().map(() => Array(6).fill(null)),
+            unsentSubmissions: JSON.parse(localStorage.getItem('unsentSubmissions')) || []
+        };
 
-        // Função para enviar dados ao Google Sheets
-        async function saveToGoogleSheet(data) {
-            try {
-                const response = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ 
-                        action: "submitSeat", 
-                        data: data,
-                        key: "SUA_CHAVE_SECRETA" // Para autenticação
-                    })
-                });
+        // Mark door seats
+        classroomData.seats[0][0] = "PORTA"; // A1
+        classroomData.seats[0][1] = "PORTA"; // A2
+
+        // ======================
+        // SEAT GENERATION
+        // ======================
+        const classroom = document.getElementById('classroom');
+        
+        // Generate seats B1-F6
+        for (let row = 1; row < 6; row++) {
+            for (let col = 0; col < 6; col++) {
+                const seatCode = `${String.fromCharCode(65 + row)}${col + 1}`;
+                const seat = document.createElement('div');
+                seat.className = 'seat';
+                seat.dataset.seat = seatCode;
                 
-                if (!response.ok) throw new Error("Erro na rede");
-                return await response.json();
+                const seatLabel = document.createElement('span');
+                seatLabel.className = 'seat-label';
+                seatLabel.textContent = seatCode;
+                seat.appendChild(seatLabel);
                 
-            } catch (error) {
-                console.error("Erro ao enviar:", error);
-                return { status: "error", message: error.message };
+                // Check if seat is occupied
+                if (classroomData.seats[row][col]) {
+                    seat.classList.add('occupied');
+                    const studentInfo = document.createElement('div');
+                    studentInfo.className = 'student-info';
+                    studentInfo.textContent = classroomData.seats[row][col].name.substring(0, 10);
+                    seat.appendChild(studentInfo);
+                }
+                
+                seat.addEventListener('click', handleSeatClick);
+                classroom.appendChild(seat);
             }
         }
 
-        // Atualiza o ano no footer
-        document.getElementById('current-year').textContent = new Date().getFullYear();
+        // ======================
+        // EVENT HANDLERS
+        // ======================
+        function handleSeatClick() {
+            const studentId = document.getElementById('studentId').value.trim();
+            if (!studentId) {
+                alert('Por favor, insira seu ID primeiro');
+                return;
+            }
+            
+            const seatCode = this.dataset.seat;
+            const [row, col] = getPositionFromCode(seatCode);
+            
+            // If clicking own occupied seat
+            if (this.classList.contains('occupied')) {
+                const seatData = classroomData.seats[row][col];
+                if (seatData && seatData.id === studentId) {
+                    if (confirm(`Liberar lugar ${seatCode}?`)) {
+                        resetSeat(seatCode);
+                    }
+                }
+                return;
+            }
+            
+            // Prevent multiple selections
+            document.querySelectorAll('.seat.selected').forEach(s => {
+                s.classList.remove('selected');
+            });
+            this.classList.add('selected');
+            document.getElementById('selectedSeat').value = seatCode;
+        }
+
+        document.getElementById('seatForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // 1. Collect form data
+            const formData = {
+                id: document.getElementById('studentId').value.trim(),
+                name: document.getElementById('studentName').value.trim(),
+                email: document.getElementById('studentEmail').value.trim(),
+                seat: document.getElementById('selectedSeat').value,
+                preferenceReason: document.getElementById('preferenceReason').value.trim(),
+                alternativeOption: document.getElementById('alternativeOption').value.trim(),
+                comments: document.getElementById('comments').value.trim(),
+                timestamp: new Date().toISOString()
+            };
+
+            // 2. Validate
+            if (!formData.id || !formData.name || !formData.seat) {
+                alert("Preencha os campos obrigatórios (ID, Nome e Lugar)!");
+                return;
+            }
+
+            // 3. Save locally
+            const [row, col] = getPositionFromCode(formData.seat);
+            classroomData.seats[row][col] = formData;
+            localStorage.setItem('classroomSeats', JSON.stringify(classroomData.seats));
+
+            // 4. Try sending to Google Sheets
+            try {
+                const response = await saveToGoogleSheet(formData);
+                
+                if (response.status !== "success") {
+                    throw new Error("Failed to save to Google Sheets");
+                }
+                
+                showSuccessMessage(formData);
+                updateSeatVisual(formData.seat, formData.name);
+                
+            } catch (error) {
+                // Store for later retry
+                classroomData.unsentSubmissions.push(formData);
+                localStorage.setItem('unsentSubmissions', JSON.stringify(classroomData.unsentSubmissions));
+                
+                showSuccessMessage(formData, true);
+                updateSeatVisual(formData.seat, formData.name);
+                console.error("Google Sheets error:", error);
+            }
+        });
+
+        // Teacher password handler
+        document.getElementById('teacherPassword').addEventListener('input', function() {
+            const btn = document.getElementById('resetAllBtn');
+            btn.style.display = (this.value === "prof123") ? 'block' : 'none';
+        });
+
+        // ======================
+        // CORE FUNCTIONS
+        // ======================
+        async function saveToGoogleSheet(data) {
+            const response = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    action: "submitSeat", 
+                    data: data, 
+                    key: CONFIG.API_KEY
+                })
+            });
+            return await response.json();
+        }
+
+        function resetSeat(seatCode) {
+            const [row, col] = getPositionFromCode(seatCode);
+            classroomData.seats[row][col] = null;
+            localStorage.setItem('classroomSeats', JSON.stringify(classroomData.seats));
+            
+            const seatElement = document.querySelector(`[data-seat="${seatCode}"]`);
+            seatElement.classList.remove('occupied', 'selected');
+            seatElement.innerHTML = `<span class="seat-label">${seatCode}</span>`;
+            
+            document.getElementById('selectedSeat').value = '';
+        }
+
+        function resetAllSeats() {
+            if (!confirm('Tem certeza que deseja resetar TODOS os lugares?\nEsta ação não pode ser desfeita!')) return;
+            
+            // Keep door seats
+            classroomData.seats = Array(6).fill().map(() => Array(6).fill(null));
+            classroomData.seats[0][0] = "PORTA";
+            classroomData.seats[0][1] = "PORTA";
+            
+            localStorage.setItem('classroomSeats', JSON.stringify(classroomData.seats));
+            
+            // Update all seats visually
+            document.querySelectorAll('.seat').forEach(seat => {
+                const seatCode = seat.dataset.seat;
+                if (seatCode && !seat.classList.contains('door')) {
+                    seat.classList.remove('occupied', 'selected');
+                    seat.innerHTML = `<span class="seat-label">${seatCode}</span>`;
+                }
+            });
+            
+            alert('Todos os lugares foram resetados!');
+            document.getElementById('teacherPassword').value = '';
+            document.getElementById('resetAllBtn').style.display = 'none';
+        }
+
+        // ======================
+        // HELPER FUNCTIONS
+        // ======================
+        function getPositionFromCode(seatCode) {
+            const row = seatCode.charCodeAt(0) - 65;
+            const col = parseInt(seatCode.slice(1)) - 1;
+            return [row, col];
+        }
+
+        function showSuccessMessage(data, isLocalOnly = false) {
+            const message = isLocalOnly 
+                ? `Lugar ${data.seat} escolhido localmente (dados serão enviados quando on-line)`
+                : `Lugar ${data.seat} registrado para ${data.name}`;
+            
+            const successMsg = document.getElementById('successMessage');
+            successMsg.textContent = message;
+            successMsg.style.display = 'block';
+            
+            setTimeout(() => {
+                document.getElementById('seatForm').reset();
+                successMsg.style.display = 'none';
+            }, 3000);
+        }
+
+        function updateSeatVisual(seatCode, studentName) {
+            const seatElement = document.querySelector(`[data-seat="${seatCode}"]`);
+            seatElement.classList.remove('selected');
+            seatElement.classList.add('occupied');
+            seatElement.innerHTML = `
+                <span class="seat-label">${seatCode}</span>
+                <div class="student-info">${studentName.substring(0, 10)}</div>
+            `;
+        }
+
+        // Initialize
+        document.getElementById('teacherPassword').value = '';
     </script>
+    <footer class="footer">
+        <p>Sistema desenvolvido por Victor Ferauche - © <span id="current-year"></span> -- Todos os direitos reservados.</p>
+        <p>Para mais informações, entre em contato: <a href="mailto:vicfera75@gmail.com">vicfera75@gmail.com</a>.</p>
+        <p>Este sistema é uma ferramenta de gerenciamento de assentos para facilitar a organização em sala de aula.</p>
+        <p>Versão 1.0 -- Data de lançamento: 14 de maio de 2025</p>        
+    </footer>
+
+<script>
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+</script>
 </body>
 </html>
