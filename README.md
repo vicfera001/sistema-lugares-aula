@@ -1,7 +1,5 @@
 # sistema-lugares-aula
 
-![Preview](https://vicfera001.github.io/sistema-lugares-aula/preview.png)
-
 Sistema interativo para alunos selecionarem seus lugares na sala de aula, com integração ao Google Sheets.
 
 ## Funcionalidades
